@@ -26,8 +26,6 @@ body {
   margin: 0;
   display: flex;
   place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
 }
 
 h1 {
@@ -42,7 +40,6 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
   cursor: pointer;
   transition: border-color 0.25s;
 }
@@ -52,6 +49,54 @@ button:hover {
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
+}
+
+#root {
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 20vh;
+}
+
+button {
+  margin-top: 20px;
+}
+
+input {
+  width: 8vw;
+  text-align: center;
+  height: 8vh;
+  font-size: x-large;
+  margin-right: 75px;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+table {
+  width: 350px;
+  line-height: 70px;
+  font-size: 70px;
+  color: red;
+  margin-bottom: 50px;
+}
+
+td {
+  width: 4vw;
+}
+
+h2 {
+  color: green;
+}
+
+h4 {
+  color: yellow;
+}
+
+#directions {
+  width: auto !important;
 }
 
 @media (prefers-color-scheme: light) {
