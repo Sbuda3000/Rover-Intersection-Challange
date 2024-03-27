@@ -9,7 +9,7 @@ function App() {
   const [robotX, setRobotX] = useState("");
   const [robotY, setRobotY] = useState("");
   const [robotDirections, setRobotDirections] = useState("");
-  const [intersections, setIntersections] = useState([]);
+  let [intersections, setIntersections] = useState([]);
 
   const handleGeneratePlateau = () => {
     if (xPlane > 0 && yPlane > 0) {
@@ -17,7 +17,6 @@ function App() {
         Array.from({ length: yPlane + 1 }, () => "."),
       );
       setPlateau(newPlateau);
-      setRobots([]);
     } else {
       alert(
         "Co-ordinates must be greater than 0, otherwise our robots will fall off the plateau",
@@ -57,22 +56,13 @@ function App() {
       const newRobots = [
         ...robots,
         {
-          position: [x, y],
+          position: [yPlane - y, x],
           directions: robotDirections,
         },
       ];
 
-      const newPlateau = Array.from({ length: xPlane + 1 }, () =>
-        Array.from({ length: yPlane + 1 }, () => "."),
-      );
-
-      newRobots.forEach((robot) => {
-        const [x, y] = robot.position;
-        newPlateau[xPlane - y][x] = "x";
-      });
-
-      setPlateau(newPlateau);
       setRobots(newRobots);
+      updatePlateauWithRobots(newRobots);
       setRobotX("");
       setRobotY("");
       setRobotDirections("");
@@ -83,55 +73,105 @@ function App() {
     }
   };
 
+  const updatePlateauWithRobots = (robots) => {
+    const newPlateau = Array.from({ length: xPlane + 1 }, () =>
+      Array.from({ length: yPlane + 1 }, () => "."),
+    );
+
+    robots.forEach((robot) => {
+      const path = generatePath(robot.directions, robot.position);
+
+      path.forEach(([pathX, pathY], index) => {
+        if (index === path.length - 1) {
+          newPlateau[pathX][pathY] = "0";
+        } else if (index === 0) {
+          newPlateau[pathX][pathY] = "X";
+        } else if (
+          pathX >= 0 &&
+          pathX <= xPlane &&
+          pathY >= 0 &&
+          pathY <= yPlane
+        ) {
+          newPlateau[pathX][pathY] = "-";
+        } else {
+          alert("Cannot place robot out of the plateau.");
+        }
+      });
+    });
+    setPlateau(newPlateau);
+  };
+
   const generatePath = (directions, initialPosition) => {
-    const path = [initialPosition];
     let [x, y] = initialPosition;
+    const path = [[x, y]]; //Initialize path with initial position marked as 'X'
 
     for (let i = 0; i < directions.length; i++) {
       switch (directions[i]) {
         case "N":
-          y++;
+          x--;
           break;
         case "S":
-          y--;
-          break;
-        case "E":
           x++;
           break;
+        case "E":
+          y++;
+          break;
         case "W":
-          x--;
+          y--;
           break;
         default:
           break;
       }
-      path.push([x, y]);
+
+      path.push([x, y]); // Add each position to the path
     }
     return path;
   };
 
   const findIntersections = () => {
-    const intersections = [];
-    const visited = new Set();
+    const tempIntersections = new Set();
 
-    robots.forEach((robot, index) => {
+    const allPaths = robots.map((robot) => {
       const path = generatePath(robot.directions, robot.position);
-      path.forEach(([x, y]) => {
-        const key = `${x},${y}`;
-        if (!visited.has(key)) {
-          visited.add(key);
-        } else {
-          intersections.push([x, y]);
-        }
-      });
+      const pathRelativeToOrigin = path
+        .slice(1)
+        .map(([x, y]) => [y, xPlane - x]);
+
+      return pathRelativeToOrigin;
     });
 
+    // Loop through each pair of paths in all the paths
+    for (let i = 0; i < allPaths.length; i++) {
+      const currentPath = allPaths[i];
+
+      for (let j = i + 1; j < allPaths.length; j++) {
+        const nextPath = allPaths[j];
+
+        // Loop through each coordinate in the current path
+        for (let k = 0; k < currentPath.length; k++) {
+          const [x, y] = currentPath[k];
+
+          // Check if the current coordinate exists in the next path
+          if (nextPath.some((coord) => coord[0] === x && coord[1] === y)) {
+            // If there is a match, add it to the set
+            tempIntersections.add(`${x},${y}`);
+          }
+        }
+      }
+    }
+
+    intersections = Array.from(tempIntersections, (coord) =>
+      coord.split(",").map(Number),
+    );
     setIntersections(intersections);
   };
 
   const isValidDirection = (directions) => {
     const isValidDirections = ["N", "S", "E", "W"];
 
-    return directions.split("").every((dir) => isValidDirections.includes(dir));
+    return directions
+      .split("")
+      .every((direction) => isValidDirections.includes(direction));
   };
 
   return (
