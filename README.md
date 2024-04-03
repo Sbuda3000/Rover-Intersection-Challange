@@ -1,3 +1,7 @@
+## DEMO Link
+http://54.164.12.29/
+
+
 # Rover-Intersection-Challange
 
 We would like you to complete the following Rover Intersection Challenge.
@@ -33,3 +37,8 @@ The position is made up of two integers, corresponding to the x and y coordinate
 
 # Output
 The output of the program should be the intersection points of the rovers.
+
+# Run app locally
+- cd my-vue-app
+- npm install
+- npm run dev
